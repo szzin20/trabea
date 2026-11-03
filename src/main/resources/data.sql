@@ -48,15 +48,24 @@ INSERT INTO part_time_employees (id, first_name, last_name, personal_email,
 
 -- Menyelaraskan sequence serial agar auto-increment bekerja normal untuk insert berikutnya.
 SELECT setval('part_time_employees_id_seq', (SELECT MAX(id) FROM part_time_employees));
+
+INSERT INTO work_shifts (id, start_time, end_time) VALUES
+(1, '08:00', '12:00'),
+(2, '12:00', '16:00'),
+(3, '16:00', '20:00'),
+(4, '20:00', '00:00')
+ON CONFLICT (id) DO UPDATE
+SET start_time = EXCLUDED.start_time,
+    end_time = EXCLUDED.end_time;
 --
--- INSERT INTO work_shifts (id, start_time, end_time) VALUES
--- (1,     '08:00',    '12:00'),
--- (2,     '12:00',    '16:00'),
--- (3,     '16:00',    '20:00'),
--- (4,     '20:00',    '00:00')
--- ON CONFLICT (id) DO UPDATE
--- SET start_time = EXCLUDED.start_time,
---     end_time = EXCLUDED.end_time;
+INSERT INTO work_shifts (id, start_time, end_time) VALUES
+(1,     '08:00',    '12:00'),
+(2,     '12:00',    '16:00'),
+(3,     '16:00',    '20:00'),
+(4,     '20:00',    '00:00')
+ON CONFLICT (id) DO UPDATE
+SET start_time = EXCLUDED.start_time,
+    end_time = EXCLUDED.end_time;
 --
 -- -- contoh telah di approve dan telah di reject
 -- INSERT INTO work_schedules (work_date, work_shift_id,
