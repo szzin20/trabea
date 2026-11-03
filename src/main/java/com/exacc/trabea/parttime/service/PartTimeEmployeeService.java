@@ -14,16 +14,21 @@ import com.exacc.trabea.user.entity.UserRole;
 import com.exacc.trabea.user.entity.UserRoleId;
 import com.exacc.trabea.user.repository.UserRepository;
 import com.exacc.trabea.user.repository.UserRoleRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class PartTimeEmployeeService {
     private static final String DEFAULT_PASSWORD = "Trabea123";
     private static final String EMAIL_DOMAIN = "@trabea.co.id";
+    private static final Set<String> SORT_PROPERTIES = Set.of(
+            "id", "firstName", "lastName", "personalEmail", "joinDate", "resignDate");
     private final PartTimeEmployeeRepository employees;
     private final UserRepository users;
     private final RoleRepository roles;
@@ -31,12 +36,6 @@ public class PartTimeEmployeeService {
     private final PasswordEncoder passwordEncoder;
     private final PartTimeEmployeeMapper mapper;
 
-    public PartTimeEmployeeService(PartTimeEmployeeRepository employees, UserRepository users,
-            RoleRepository roles, UserRoleRepository userRoles, PasswordEncoder passwordEncoder,
-            PartTimeEmployeeMapper mapper) {
-        this.employees = employees; this.users = users; this.roles = roles;
-        this.userRoles = userRoles; this.passwordEncoder = passwordEncoder; this.mapper = mapper;
-    }
 
     @Transactional
     public PartTimeEmployeeResponse create(PartTimeEmployeeRequest request) {
@@ -58,10 +57,13 @@ public class PartTimeEmployeeService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PartTimeEmployeeResponse> findAll(Pageable pageable, String name, Boolean active) {
-        if (pageable.getPageSize() < 1 || pageable.getPageSize() > 100)
-            throw new BusinessRuleException("Page/size tidak valid", HttpStatus.BAD_REQUEST);
-        return employees.search(name == null || name.isBlank() ? null : name.trim(), active, pageable)
+    public Page<PartTimeEmployeeResponse> findAll(int page, int size, String name) {
+        if (page < 0) throw new BusinessRuleException("Page harus minimal 0", HttpStatus.BAD_REQUEST);
+        if (size < 1 || size > 100)
+            throw new BusinessRuleException("Size harus antara 1 dan 100", HttpStatus.BAD_REQUEST);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
+        String keyword = (name == null) ? "" : name.trim();
+        return employees.search(keyword, pageable)
                 .map(mapper::toResponse);
     }
 

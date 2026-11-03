@@ -1,6 +1,7 @@
 package com.exacc.trabea.common;
 
 
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -10,7 +11,19 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import lombok.extern.slf4j.Slf4j;
+
+import java.net.BindException;
 
 @RestControllerAdvice
 @Slf4j
@@ -45,15 +58,40 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ApiResponse.failure(message));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(
-            IllegalArgumentException exception) {
-        return ResponseEntity.badRequest().body(ApiResponse.failure(exception.getMessage()));
-    }
-
     @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
     public ResponseEntity<ApiResponse<Void>> handleMalformedRequest(Exception exception) {
         return ResponseEntity.badRequest().body(ApiResponse.failure("Format parameter atau request body tidak valid"));
+    }
+
+    @ExceptionHandler({MissingServletRequestParameterException.class, ConstraintViolationException.class,
+            BindException.class, PropertyReferenceException.class})
+    public ResponseEntity<ApiResponse<Void>> handleBadRequest(Exception exception) {
+        return ResponseEntity.badRequest().body(ApiResponse.failure("Request tidak valid"));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodNotAllowed() {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ApiResponse.failure("HTTP method tidak didukung"));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnsupportedMediaType() {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(ApiResponse.failure("Content-Type tidak didukung"));
+    }
+
+    @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
+    public ResponseEntity<ApiResponse<Void>> handleNotFound() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure("Endpoint tidak ditemukan"));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied() {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.failure("Akses ditolak"));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthenticationFailure() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.failure("Autentikasi diperlukan"));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

@@ -14,6 +14,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.exacc.trabea.common.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
+import com.exacc.trabea.user.repository.UserRepository;
+import com.exacc.trabea.user.repository.UserRoleRepository;
 
 @Configuration
 public class SecurityConfig {
@@ -25,13 +28,15 @@ public class SecurityConfig {
     }
 
     @Bean SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService,
-                                                  ObjectMapper objectMapper) throws Exception {
+                                                  ObjectMapper objectMapper, UserRepository users,
+                                                  UserRoleRepository userRoles) throws Exception {
         return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/roles").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/part-time-employees/**").hasAnyRole("ADMINISTRATOR", "MANAGER")
                         .requestMatchers("/api/v1/part-time-employees/**").hasRole("ADMINISTRATOR")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMINISTRATOR")
                         .requestMatchers("/api/v1/manager/**").hasRole("MANAGER")
@@ -42,13 +47,14 @@ public class SecurityConfig {
                                 response, objectMapper, HttpServletResponse.SC_UNAUTHORIZED, "Autentikasi diperlukan"))
                         .accessDeniedHandler((request, response, exception) -> writeError(
                                 response, objectMapper, HttpServletResponse.SC_FORBIDDEN, "Akses ditolak")))
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService, objectMapper), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService, objectMapper, users, userRoles), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     private static void writeError(HttpServletResponse response, ObjectMapper mapper, int status, String message)
             throws java.io.IOException {
         response.setStatus(status);
+        if (status == HttpServletResponse.SC_UNAUTHORIZED) response.setHeader("WWW-Authenticate", "Bearer");
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         mapper.writeValue(response.getOutputStream(), ApiResponse.failure(message));

@@ -55,6 +55,12 @@ class AuthServiceTest {
         assertThrows(ResponseStatusException.class, () -> service.login(new LoginRequest(user.getWorkEmail(), "password123", "Manager")));
     }
 
+    @Test void unknownRoleIsBadRequest() {
+        var exception = assertThrows(ResponseStatusException.class, () ->
+                service.login(new LoginRequest(user.getWorkEmail(), "password123", "SUPERUSER")));
+        assertEquals(400, exception.getStatusCode().value());
+    }
+
     @Test void legacySeedRoleNamesMapToCanonicalActiveRole() {
         when(userRoles.findAllByUser_WorkEmail(user.getWorkEmail())).thenReturn(List.of(link("PART_TIME")));
         var response = service.login(new LoginRequest(user.getWorkEmail(), "password123", "PartTimer"));

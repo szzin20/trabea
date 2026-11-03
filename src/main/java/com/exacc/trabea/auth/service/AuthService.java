@@ -29,7 +29,7 @@ public class AuthService {
         String requestedRole;
         try { requestedRole = RoleAuthority.canonical(request.role()); }
         catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Role tidak dimiliki user");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role tidak dikenal");
         }
         boolean ownsRole = userRoles.findAllByUser_WorkEmail(user.getWorkEmail()).stream()
                 .map(link -> link.getRole().getName())

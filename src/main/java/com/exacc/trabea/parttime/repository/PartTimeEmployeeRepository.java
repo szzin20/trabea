@@ -25,9 +25,7 @@ public interface PartTimeEmployeeRepository
 
     boolean existsByPersonalPhoneNumberAndIdNot(String personalPhoneNumber, Integer id);
 
-    @Query("select p from PartTimeEmployee p where " +
-            "(:name is null or lower(concat(p.firstName, ' ', p.lastName)) like lower(concat('%', :name, '%'))) and " +
-            "(:active is null or (:active = true and p.resignDate is null) or (:active = false and p.resignDate is not null))")
-    Page<PartTimeEmployee> search(@Param("name") String name, @Param("active") Boolean active, Pageable pageable);
-}
+    @Query("select p from PartTimeEmployee p " +
+            "where lower(concat(p.firstName, ' ', p.lastName)) like lower(concat('%', :name, '%'))")
+    Page<PartTimeEmployee> search(@Param("name") String name, Pageable pageable);}
 

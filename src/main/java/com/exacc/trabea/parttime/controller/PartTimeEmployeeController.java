@@ -6,14 +6,13 @@ import com.exacc.trabea.parttime.dto.PartTimeEmployeeResponse;
 import com.exacc.trabea.parttime.service.PartTimeEmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/part-time-employees")
+@SecurityRequirement(name = "bearerAuth")
 public class PartTimeEmployeeController {
     private final PartTimeEmployeeService service;
     public PartTimeEmployeeController(PartTimeEmployeeService service) { this.service = service; }
@@ -24,9 +23,10 @@ public class PartTimeEmployeeController {
     }
     @GetMapping
     public ApiResponse<Page<PartTimeEmployeeResponse>> findAll(
-            @PageableDefault(size = 10, sort = "firstName", direction = Sort.Direction.ASC) Pageable pageable,
-            @RequestParam(required = false) String name, @RequestParam(required = false) Boolean active) {
-        return ApiResponse.success("Daftar PartTimer", service.findAll(pageable, name, active));
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String name) {
+        return ApiResponse.success("Daftar PartTimer", service.findAll(page, size, name));
     }
     @GetMapping("/{id}")
     public ApiResponse<PartTimeEmployeeResponse> findById(@PathVariable Integer id) {

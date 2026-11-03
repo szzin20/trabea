@@ -5,7 +5,5 @@ import java.time.LocalDateTime;
 
 public record PartTimeEmployeeResponse(
         Integer id, String firstName, String lastName, String personalEmail,
-        String personalPhoneNumber, EducationLevel lastEducation,
-        EducationLevel onGoingEducation, LocalDateTime joinDate,
-        LocalDateTime resignDate, String workEmail
+        String workEmail, String personalPhoneNumber, LocalDateTime joinDate
 ) {}
