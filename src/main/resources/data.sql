@@ -1,5 +1,5 @@
 INSERT INTO users (work_email, password) VALUES
-('aldi.danis@trabea.co.id',     '$2a$11$AEPkRqjVftmjTWPvRvmBieyhuRSk8wbmf47a8xr6tplfk7MjKQgJW'),
+('aldi.danis@trabea.co.id',     '$2a$12$rr58hcWz.ErwxjqmiYvCUuslEvIB.R7nUhePENgtZZSVV75biae5a'),
 ('anna.danis@trabea.co.id',     '$2a$11$AEPkRqjVftmjTWPvRvmBieyhuRSk8wbmf47a8xr6tplfk7MjKQgJW'),
 ('muh.danis@trabea.co.id',      '$2a$11$AEPkRqjVftmjTWPvRvmBieyhuRSk8wbmf47a8xr6tplfk7MjKQgJW'),
 ('peter.johnson@trabea.co.id',  '$2a$11$AEPkRqjVftmjTWPvRvmBieyhuRSk8wbmf47a8xr6tplfk7MjKQgJW'),
@@ -24,28 +24,30 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 
 -- PostgreSQL tidak menggunakan SET IDENTITY_INSERT ON. Data id bisa dimasukkan secara eksplisit.
 INSERT INTO employees (id, first_name, last_name, work_email) VALUES
-(1,     'Aldi', 'Danis',    'aldi.danis@trabea.co.id'),
-(2,     'Anna', 'Danis',    'anna.danis@trabea.co.id'),
-(3,     'Muh',  'Danis',    'muh.danis@trabea.co.id');
+    (1,     'Aldi', 'Danis',    'aldi.danis@trabea.co.id'),
+    (2,     'Anna', 'Danis',    'anna.danis@trabea.co.id'),
+    (3,     'Muh',  'Danis',    'muh.danis@trabea.co.id');
 
 -- Menyelaraskan sequence serial agar auto-increment bekerja normal untuk insert berikutnya
 SELECT setval('employees_id_seq', (SELECT MAX(id) FROM employees));
 
--- INSERT INTO part_time_employees (id, first_name, last_name, personal_email,
---                                 personal_phone_number, last_education,
---                                 on_going_education, join_date, work_email) VALUES
--- (1,     'Peter',            'Johnson',      'peter.johnson@gmail.com',
---         '1234567821',       'Master',       'Doctorate',    CURRENT_TIMESTAMP - INTERVAL '1 year',     'peter.johnson@trabea.co.id'),
--- (2,     'Patra',            'Tobias',       'patra.tobias@hotmail.com',
---         '8761231677',       'HighSchool',   'Bachelor',     CURRENT_TIMESTAMP - INTERVAL '2 years',    'patra.tobias@trabea.co.id'),
--- (3,     'Alan',             'Conway',       'alan.conway@gmail.com',
---         '44117123151',      'Bachelor',     NULL,           CURRENT_TIMESTAMP - INTERVAL '5 months',   'alan.conway@trabea.co.id'),
--- (4,     'Ali',              'Jonathan',     'ali.jonathan@yahoo.com',
---         '92132561725',      'Bachelor',     'Master',       CURRENT_TIMESTAMP - INTERVAL '2 months',   'ali.jonathan@trabea.co.id'),
--- (5,     'Robert',           'Tan',          'robert.tan@gmail.co.id',
---         '6281249812525',    'Bachelor',     NULL,           CURRENT_TIMESTAMP - INTERVAL '2 months',   'robert.tan@trabea.co.id');
---
--- SELECT setval('part_time_employees_id_seq', (SELECT MAX(id) FROM part_time_employees));
+-- Data employee yang dibuat melalui seed ini hanya part-time employee.
+INSERT INTO part_time_employees (id, first_name, last_name, personal_email,
+                                 personal_phone_number, last_education,
+                                 on_going_education, join_date, work_email) VALUES
+(1,     'Peter',            'Johnson',      'peter.johnson@gmail.com',
+        '1234567821',       'MASTER',       'DOCTORATE',    CURRENT_TIMESTAMP - INTERVAL '1 year',     'peter.johnson@trabea.co.id'),
+(2,     'Patra',            'Tobias',       'patra.tobias@hotmail.com',
+        '8761231677',       'HIGH_SCHOOL',  'BACHELOR',     CURRENT_TIMESTAMP - INTERVAL '2 years',    'patra.tobias@trabea.co.id'),
+(3,     'Alan',             'Conway',       'alan.conway@gmail.com',
+        '44117123151',      'BACHELOR',     NULL,           CURRENT_TIMESTAMP - INTERVAL '5 months',   'alan.conway@trabea.co.id'),
+(4,     'Ali',              'Jonathan',     'ali.jonathan@yahoo.com',
+        '92132561725',      'BACHELOR',     'MASTER',       CURRENT_TIMESTAMP - INTERVAL '2 months',   'ali.jonathan@trabea.co.id'),
+(5,     'Robert',           'Tan',          'robert.tan@gmail.co.id',
+        '6281249812525',    'BACHELOR',     NULL,           CURRENT_TIMESTAMP - INTERVAL '2 months',   'robert.tan@trabea.co.id');
+
+-- Menyelaraskan sequence serial agar auto-increment bekerja normal untuk insert berikutnya.
+SELECT setval('part_time_employees_id_seq', (SELECT MAX(id) FROM part_time_employees));
 --
 -- INSERT INTO work_shifts (id, start_time, end_time) VALUES
 -- (1,     '08:00',    '12:00'),

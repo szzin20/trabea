@@ -9,6 +9,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
@@ -17,13 +18,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleGlobalException(ResourceNotFoundException exception) {
-        return ResponseEntity.status(exception.getStatus())
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.failure(exception.getMessage()));
     }
 
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessRule(BusinessRuleException exception) {
         return ResponseEntity.status(exception.getStatus()).body(ApiResponse.failure(exception.getMessage()));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResponseStatus(ResponseStatusException exception) {
+        HttpStatus status = HttpStatus.valueOf(exception.getStatusCode().value());
+        String message = exception.getReason() == null ? status.getReasonPhrase() : exception.getReason();
+        return ResponseEntity.status(status).body(ApiResponse.failure(message));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -2,16 +2,15 @@ package com.exacc.trabea.security.service;
 
 
 import com.exacc.trabea.user.entity.User;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.exacc.trabea.security.jwt.RoleAuthority;
 
 import java.util.Collection;
 import java.util.List;
 
-@Getter
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
@@ -21,7 +20,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(
-                new SimpleGrantedAuthority("ROLE_" + activeRole.toUpperCase())
+                new SimpleGrantedAuthority(RoleAuthority.authority(activeRole))
         );
     }
 
@@ -34,5 +33,14 @@ public class CustomUserDetails implements UserDetails {
     public String getUsername() {
         return user.getWorkEmail();
     }
+
+    public String getActiveRole() {
+        return activeRole;
+    }
+
+    public User getUser() {
+        return user;
+    }
 }
+
 
