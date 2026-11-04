@@ -37,6 +37,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/roles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/shifts", "/api/v1/shifts/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/work-schedules").hasAnyRole("MANAGER", "PART_TIME")
+                        .requestMatchers("/api/v1/work-schedules/pending", "/api/v1/work-schedules/*/approve",
+                                "/api/v1/work-schedules/*/reject").hasRole("MANAGER")
                         .requestMatchers("/api/v1/work-schedules/**").hasRole("PART_TIME")
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/part-time-employees/**").hasRole("ADMIN")

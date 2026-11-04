@@ -59,35 +59,35 @@ SET start_time = EXCLUDED.start_time,
     end_time = EXCLUDED.end_time;
 
 -- contoh telah di approve dan telah di reject
--- INSERT INTO work_schedules (work_date, work_shift_id,
---     manager_id, part_time_employee_id, is_approved) VALUES
--- (CURRENT_DATE,                      1, 1, 1, TRUE),
--- (CURRENT_DATE,                      2, 1, 1, TRUE),
--- (CURRENT_DATE,                      3, 1, 2, TRUE),
--- (CURRENT_DATE,                      4, 1, 2, TRUE),
--- (CURRENT_DATE + INTERVAL '1 day',   3, 1, 2, TRUE),
--- (CURRENT_DATE + INTERVAL '1 day',   4, 1, 2, TRUE),
--- (CURRENT_DATE + INTERVAL '4 days',  1, 3, 3, TRUE),
--- (CURRENT_DATE + INTERVAL '4 days',  1, 3, 4, TRUE),
--- (CURRENT_DATE + INTERVAL '4 days',  2, 3, 4, TRUE),
--- (CURRENT_DATE + INTERVAL '4 days',  2, 3, 5, FALSE),    -- disapproved
--- (CURRENT_DATE + INTERVAL '4 days',  3, 3, 5, TRUE),
--- (CURRENT_DATE + INTERVAL '4 days',  4, 3, 5, TRUE);
+INSERT INTO work_schedules (work_date, work_shift_id,
+    manager_id, part_time_employee_id, is_approved) VALUES
+(CURRENT_DATE,                      1, 1, 1, TRUE),
+(CURRENT_DATE,                      2, 1, 1, TRUE),
+(CURRENT_DATE,                      3, 1, 2, TRUE),
+(CURRENT_DATE,                      4, 1, 2, TRUE),
+(CURRENT_DATE + INTERVAL '1 day',   3, 1, 2, TRUE),
+(CURRENT_DATE + INTERVAL '1 day',   4, 1, 2, TRUE),
+(CURRENT_DATE + INTERVAL '5 days',  1, 3, 3, TRUE),
+(CURRENT_DATE + INTERVAL '6 days',  1, 3, 4, TRUE),
+(CURRENT_DATE + INTERVAL '4 days',  2, 3, 4, TRUE),
+(CURRENT_DATE + INTERVAL '4 days',  2, 3, 5, FALSE),    -- disapproved
+(CURRENT_DATE + INTERVAL '4 days',  3, 3, 5, TRUE),
+(CURRENT_DATE + INTERVAL '4 days',  4, 3, 5, TRUE);
 -- --
 -- -- contoh kasus yang belum di cek sama manager:
--- INSERT INTO work_schedules
--- (work_date, work_shift_id, part_time_employee_id) VALUES
--- (CURRENT_DATE + INTERVAL '7 days',      1,      1),
--- (CURRENT_DATE + INTERVAL '7 days',      2,      1),
--- (CURRENT_DATE + INTERVAL '7 days',      1,      2),
--- (CURRENT_DATE + INTERVAL '7 days',      2,      2),
--- (CURRENT_DATE + INTERVAL '7 days',      3,      2),
--- (CURRENT_DATE + INTERVAL '7 days',      3,      3),
--- (CURRENT_DATE + INTERVAL '7 days',      4,      3),
--- (CURRENT_DATE + INTERVAL '9 days',      1,      1),
--- (CURRENT_DATE + INTERVAL '9 days',      2,      1),
--- (CURRENT_DATE + INTERVAL '9 days',      1,      2),
--- (CURRENT_DATE + INTERVAL '9 days',      2,      2),
--- (CURRENT_DATE + INTERVAL '9 days',      3,      2),
--- (CURRENT_DATE + INTERVAL '9 days',      3,      3),
--- (CURRENT_DATE + INTERVAL '9 days',      4,      3);
+INSERT INTO work_schedules
+(work_date, work_shift_id, part_time_employee_id) VALUES
+(CURRENT_DATE + INTERVAL '7 days',      1,      1),
+(CURRENT_DATE + INTERVAL '7 days',      2,      1),
+(CURRENT_DATE + INTERVAL '7 days',      1,      2),
+(CURRENT_DATE + INTERVAL '7 days',      2,      2),
+(CURRENT_DATE + INTERVAL '7 days',      3,      2),
+(CURRENT_DATE + INTERVAL '7 days',      3,      3),
+(CURRENT_DATE + INTERVAL '7 days',      4,      3),
+(CURRENT_DATE + INTERVAL '9 days',      1,      1),
+(CURRENT_DATE + INTERVAL '9 days',      2,      1),
+(CURRENT_DATE + INTERVAL '9 days',      1,      2),
+(CURRENT_DATE + INTERVAL '9 days',      2,      2),
+(CURRENT_DATE + INTERVAL '9 days',      3,      2),
+(CURRENT_DATE + INTERVAL '9 days',      3,      3),
+(CURRENT_DATE + INTERVAL '9 days',      4,      3);

@@ -6,6 +6,8 @@ import com.exacc.trabea.parttime.repository.PartTimeEmployeeRepository;
 import com.exacc.trabea.shift.repository.ShiftRepository;
 import com.exacc.trabea.workschedule.dto.CreateWorkScheduleRequest;
 import com.exacc.trabea.workschedule.dto.WorkScheduleResponse;
+import com.exacc.trabea.workschedule.dto.SchedulePageItem;
+import com.exacc.trabea.workschedule.dto.WorkScheduleApprovalResponse;
 import com.exacc.trabea.workschedule.entity.WorkSchedule;
 import com.exacc.trabea.workschedule.mapper.WorkScheduleMapper;
 import com.exacc.trabea.workschedule.repository.WorkScheduleRepository;
@@ -20,10 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.time.ZoneId;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class WorkScheduleService {
+    private static final ZoneId PROJECT_ZONE = ZoneId.of("Asia/Jakarta");
     private final WorkScheduleRepository schedules;
     private final PartTimeEmployeeRepository employees;
     private final ShiftRepository shifts;
@@ -77,5 +82,44 @@ public class WorkScheduleService {
         return schedules.findMine(employee.getId(), PageRequest.of(page, size,
                         Sort.by(Sort.Order.asc("workDate"), Sort.Order.asc("workShift.id"))))
                 .map(mapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SchedulePageItem> getSchedulePage(String week) {
+        String selectedWeek = week == null ? "current" : week.trim().toLowerCase(java.util.Locale.ROOT);
+        if (!selectedWeek.equals("current") && !selectedWeek.equals("next")) {
+            throw new BusinessRuleException("Parameter week harus bernilai current atau next", HttpStatus.BAD_REQUEST);
+        }
+        LocalDate today = LocalDate.now(PROJECT_ZONE);
+        LocalDate start = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        if (selectedWeek.equals("next")) start = start.plusWeeks(1);
+        LocalDate end = start.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
+        return schedules.findApprovedForPeriod(start, end).stream()
+                .map(mapper::toSchedulePageItem).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkScheduleApprovalResponse> getPendingSchedules() {
+        return schedules.findAllPending().stream().map(mapper::toApprovalResponse).toList();
+    }
+
+    @Transactional
+    public WorkScheduleApprovalResponse approveSchedule(Integer id) {
+        return processApproval(id, true);
+    }
+
+    @Transactional
+    public WorkScheduleApprovalResponse rejectSchedule(Integer id) {
+        return processApproval(id, false);
+    }
+
+    private WorkScheduleApprovalResponse processApproval(Integer id, boolean approved) {
+        WorkSchedule schedule = schedules.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Pengajuan jadwal dengan ID " + id + " tidak ditemukan", HttpStatus.NOT_FOUND));
+        if (schedule.getIsApproved() != null) {
+            throw new BusinessRuleException("Pengajuan jadwal sudah diproses", HttpStatus.CONFLICT);
+        }
+        schedule.setIsApproved(approved);
+        return mapper.toApprovalResponse(schedules.save(schedule));
     }
 }

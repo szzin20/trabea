@@ -1,6 +1,8 @@
 package com.exacc.trabea.workschedule.mapper;
 
 import com.exacc.trabea.workschedule.dto.WorkScheduleResponse;
+import com.exacc.trabea.workschedule.dto.SchedulePageItem;
+import com.exacc.trabea.workschedule.dto.WorkScheduleApprovalResponse;
 import com.exacc.trabea.workschedule.entity.WorkSchedule;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,4 +16,18 @@ public interface WorkScheduleMapper {
     @Mapping(target = "startTime", source = "workShift.startTime")
     @Mapping(target = "endTime", source = "workShift.endTime")
     WorkScheduleResponse toResponse(WorkSchedule schedule);
+
+    @Mapping(target = "partTimerId", source = "partTimeEmployee.id")
+    @Mapping(target = "fullName", expression = "java(schedule.getPartTimeEmployee().getFirstName() + \" \" + schedule.getPartTimeEmployee().getLastName())")
+    @Mapping(target = "date", source = "workDate")
+    @Mapping(target = "shiftId", source = "workShift.id")
+    SchedulePageItem toSchedulePageItem(WorkSchedule schedule);
+
+    @Mapping(target = "workScheduleId", source = "id")
+    @Mapping(target = "partTimerId", source = "partTimeEmployee.id")
+    @Mapping(target = "fullName", expression = "java(schedule.getPartTimeEmployee().getFirstName() + \" \" + schedule.getPartTimeEmployee().getLastName())")
+    @Mapping(target = "date", source = "workDate")
+    @Mapping(target = "shiftId", source = "workShift.id")
+    @Mapping(target = "status", expression = "java(schedule.getIsApproved() == null ? \"PENDING\" : schedule.getIsApproved() ? \"APPROVED\" : \"REJECTED\")")
+    WorkScheduleApprovalResponse toApprovalResponse(WorkSchedule schedule);
 }
