@@ -3,6 +3,7 @@ package com.exacc.trabea.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Service
+@Getter
 public class JwtService {
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
     private final SecretKey key;
@@ -40,14 +42,15 @@ public class JwtService {
 
     public String generateToken(String email, String activeRole) {
         Instant now = Instant.now();
-        return Jwts.builder().subject(email).claim("activeRole", RoleAuthority.canonical(activeRole))
-                .issuedAt(Date.from(now)).expiration(Date.from(now.plusMillis(expirationMs)))
+        return Jwts.builder()
+                .subject(email)
+                .claim("activeRole", RoleAuthority.canonical(activeRole))
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusMillis(expirationMs)))
                 .signWith(key).compact();
     }
 
     public Claims parse(String token) {
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
-
-    public long getExpirationMs() { return expirationMs; }
 }

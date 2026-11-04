@@ -27,8 +27,6 @@ import java.util.Set;
 public class PartTimeEmployeeService {
     private static final String DEFAULT_PASSWORD = "Trabea123";
     private static final String EMAIL_DOMAIN = "@trabea.co.id";
-    private static final Set<String> SORT_PROPERTIES = Set.of(
-            "id", "firstName", "lastName", "personalEmail", "joinDate", "resignDate");
     private final PartTimeEmployeeRepository employees;
     private final UserRepository users;
     private final RoleRepository roles;

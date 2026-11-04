@@ -10,7 +10,7 @@ class JwtServiceTest {
         var service = new JwtService(SECRET, 60_000);
         var claims = service.parse(service.generateToken("user@example.com", "Manager"));
         assertEquals("user@example.com", claims.getSubject());
-        assertEquals("Manager", claims.get("activeRole"));
+        assertEquals("MANAGER", claims.get("activeRole"));
     }
 
     @Test void rejectsExpiredToken() throws InterruptedException {

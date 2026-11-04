@@ -57,17 +57,8 @@ INSERT INTO work_shifts (id, start_time, end_time) VALUES
 ON CONFLICT (id) DO UPDATE
 SET start_time = EXCLUDED.start_time,
     end_time = EXCLUDED.end_time;
---
-INSERT INTO work_shifts (id, start_time, end_time) VALUES
-(1,     '08:00',    '12:00'),
-(2,     '12:00',    '16:00'),
-(3,     '16:00',    '20:00'),
-(4,     '20:00',    '00:00')
-ON CONFLICT (id) DO UPDATE
-SET start_time = EXCLUDED.start_time,
-    end_time = EXCLUDED.end_time;
---
--- -- contoh telah di approve dan telah di reject
+
+-- contoh telah di approve dan telah di reject
 -- INSERT INTO work_schedules (work_date, work_shift_id,
 --     manager_id, part_time_employee_id, is_approved) VALUES
 -- (CURRENT_DATE,                      1, 1, 1, TRUE),
@@ -82,7 +73,7 @@ SET start_time = EXCLUDED.start_time,
 -- (CURRENT_DATE + INTERVAL '4 days',  2, 3, 5, FALSE),    -- disapproved
 -- (CURRENT_DATE + INTERVAL '4 days',  3, 3, 5, TRUE),
 -- (CURRENT_DATE + INTERVAL '4 days',  4, 3, 5, TRUE);
---
+-- --
 -- -- contoh kasus yang belum di cek sama manager:
 -- INSERT INTO work_schedules
 -- (work_date, work_shift_id, part_time_employee_id) VALUES

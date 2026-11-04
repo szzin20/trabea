@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -18,18 +19,13 @@ import com.exacc.trabea.security.service.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.exacc.trabea.common.ApiResponse;
 
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
     private final UserRepository users;
     private final UserRoleRepository userRoles;
-    public JwtAuthenticationFilter(JwtService jwtService, ObjectMapper objectMapper,
-                                   UserRepository users, UserRoleRepository userRoles) {
-        this.jwtService = jwtService;
-        this.objectMapper = objectMapper;
-        this.users = users;
-        this.userRoles = userRoles;
-    }
+
 
     @Override protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                                FilterChain chain) throws ServletException, IOException {

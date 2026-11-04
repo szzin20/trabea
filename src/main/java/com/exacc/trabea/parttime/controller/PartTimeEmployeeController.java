@@ -5,6 +5,7 @@ import com.exacc.trabea.parttime.dto.PartTimeEmployeeRequest;
 import com.exacc.trabea.parttime.dto.PartTimeEmployeeResponse;
 import com.exacc.trabea.parttime.service.PartTimeEmployeeService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
@@ -13,9 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/part-time-employees")
 @SecurityRequirement(name = "bearerAuth")
+@RequiredArgsConstructor
 public class PartTimeEmployeeController {
+
     private final PartTimeEmployeeService service;
-    public PartTimeEmployeeController(PartTimeEmployeeService service) { this.service = service; }
 
     @PostMapping @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<PartTimeEmployeeResponse> create(@Valid @RequestBody PartTimeEmployeeRequest request) {

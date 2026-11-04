@@ -37,11 +37,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/roles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/shifts", "/api/v1/shifts/**").authenticated()
+                        .requestMatchers("/api/v1/work-schedules/**").hasRole("PART_TIME")
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/v1/part-time-employees/**").hasRole("ADMINISTRATOR")
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMINISTRATOR")
+                        .requestMatchers("/api/v1/part-time-employees/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/manager/**").hasRole("MANAGER")
-                        .requestMatchers("/api/v1/part-timer/**").hasRole("PARTTIMER")
+                        .requestMatchers("/api/v1/part-timer/**").hasRole("PART_TIME")
                         .anyRequest().authenticated())
                 .exceptionHandling(errors -> errors
                         .authenticationEntryPoint((request, response, exception) -> writeError(
