@@ -27,8 +27,8 @@ public class ShiftController {
         return ResponseEntity.ok(ApiResponse.success("Shifts berhasil ditemukan", service.getAllShifts()));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ShiftResponse>> getShiftById(@PathVariable Integer id) {
-        return ResponseEntity.ok(ApiResponse.success("Shift berhasil ditemukan", service.getShiftById(id)));
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ApiResponse<ShiftResponse>> getShiftById(@PathVariable Integer id) {
+//        return ResponseEntity.ok(ApiResponse.success("Shift berhasil ditemukan", service.getShiftById(id)));
+//    }
 }

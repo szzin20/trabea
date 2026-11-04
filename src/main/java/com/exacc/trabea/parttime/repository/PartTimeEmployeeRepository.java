@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Lock;
+import jakarta.persistence.LockModeType;
 
 import java.util.Optional;
 
@@ -14,6 +16,10 @@ public interface PartTimeEmployeeRepository
         extends JpaRepository<PartTimeEmployee, Integer> {
 
     Optional<PartTimeEmployee> findByUser_WorkEmail(String workEmail);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from PartTimeEmployee p where p.user.workEmail = :workEmail")
+    Optional<PartTimeEmployee> findByUser_WorkEmailForUpdate(@Param("workEmail") String workEmail);
 
     boolean existsByPersonalEmail(String personalEmail);
 

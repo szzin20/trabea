@@ -38,6 +38,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/roles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/shifts", "/api/v1/shifts/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/work-schedules").hasAnyRole("MANAGER", "PART_TIME")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/work-schedules/part-time-employees/*")
+                                .hasAnyRole("MANAGER", "PART_TIME")
                         .requestMatchers("/api/v1/work-schedules/pending", "/api/v1/work-schedules/*/approve",
                                 "/api/v1/work-schedules/*/reject").hasRole("MANAGER")
                         .requestMatchers("/api/v1/work-schedules/**").hasRole("PART_TIME")

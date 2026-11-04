@@ -22,10 +22,10 @@ public class ShiftService {
         return shifts.findAllByOrderByIdAsc().stream().map(mapper::toResponse).toList();
     }
 
-    @Transactional(readOnly = true)
-    public ShiftResponse getShiftById(Integer id) {
-        return shifts.findById(id)
-                .map(mapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Shift dengan ID " + id + " tidak ditemukan", HttpStatus.NOT_FOUND));
-    }
+//    @Transactional(readOnly = true)
+//    public ShiftResponse getShiftById(Integer id) {
+//        return shifts.findById(id)
+//                .map(mapper::toResponse)
+//                .orElseThrow(() -> new ResourceNotFoundException("Shift dengan ID " + id + " tidak ditemukan", HttpStatus.NOT_FOUND));
+//    }
 }

@@ -5,6 +5,8 @@ import com.exacc.trabea.workschedule.dto.CreateWorkScheduleRequest;
 import com.exacc.trabea.workschedule.dto.WorkScheduleResponse;
 import com.exacc.trabea.workschedule.dto.SchedulePageItem;
 import com.exacc.trabea.workschedule.dto.WorkScheduleApprovalResponse;
+import com.exacc.trabea.workschedule.dto.ReviewItemResponse;
+import com.exacc.trabea.workschedule.dto.ScheduleEmployeeDetailResponse;
 import com.exacc.trabea.workschedule.service.WorkScheduleService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -14,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/v1/work-schedules")
@@ -28,9 +32,23 @@ public class WorkScheduleController {
         return ResponseEntity.ok(ApiResponse.success("Jadwal berhasil ditemukan", service.getSchedulePage(week)));
     }
 
+    @GetMapping("/part-time-employees/{partTimerId}")
+    public ResponseEntity<ApiResponse<ScheduleEmployeeDetailResponse>> getScheduleEmployeeDetail(
+            @PathVariable Integer partTimerId) {
+        return ResponseEntity.ok(ApiResponse.success("Detail part-time employee berhasil ditemukan",
+                service.getScheduleEmployeeDetail(partTimerId)));
+    }
+
     @GetMapping("/pending")
-    public ResponseEntity<ApiResponse<java.util.List<WorkScheduleApprovalResponse>>> getPendingSchedules() {
-        return ResponseEntity.ok(ApiResponse.success("Pengajuan pending berhasil ditemukan", service.getPendingSchedules()));
+    public ResponseEntity<ApiResponse<Page<ReviewItemResponse>>> getPendingSchedules(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer shiftId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(ApiResponse.success("Pengajuan berhasil ditemukan",
+                service.searchPendingForReview(name, shiftId, startDate, endDate, page, size)));
     }
 
     @PatchMapping("/{id}/approve")
