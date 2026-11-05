@@ -8,5 +8,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface PartTimeEmployeeMapper {
     @Mapping(target = "workEmail", source = "user.workEmail")
+    @Mapping(target = "fullName", expression = "java(employee.getFirstName() + \" \" + employee.getLastName())")
     PartTimeEmployeeResponse toResponse(PartTimeEmployee employee);
 }
