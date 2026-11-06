@@ -1,6 +1,8 @@
 package com.exacc.trabea.workschedule.service;
 
 import com.exacc.trabea.common.BusinessRuleException;
+import com.exacc.trabea.common.DuplicateResourceException;
+import com.exacc.trabea.common.ForbiddenException;
 import com.exacc.trabea.common.ResourceNotFoundException;
 import com.exacc.trabea.parttime.repository.PartTimeEmployeeRepository;
 import com.exacc.trabea.shift.repository.ShiftRepository;
@@ -17,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,22 +42,22 @@ public class WorkScheduleService {
     @Transactional
     public WorkScheduleResponse createWorkSchedule(String workEmail, CreateWorkScheduleRequest request) {
         var employee = employees.findByUser_WorkEmailForUpdate(workEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("Part-Time Employee tidak ditemukan", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException("Part-Time Employee tidak ditemukan"));
         if (employee.getResignDate() != null)
-            throw new BusinessRuleException("Pekerja yang sudah resign tidak dapat mengajukan shift", HttpStatus.FORBIDDEN);
+            throw new ForbiddenException("Pekerja yang sudah resign tidak dapat mengajukan shift");
 
         LocalDate date = request.workDate();
         validatePeriod(date);
         if (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY)
-            throw new BusinessRuleException("Pengajuan hanya diperbolehkan pada hari Senin sampai Jumat", HttpStatus.BAD_REQUEST);
+            throw new BusinessRuleException("Pengajuan hanya diperbolehkan pada hari Senin sampai Jumat");
 
         var shift = shifts.findById(request.workShiftId()).orElseThrow(() ->
-                new ResourceNotFoundException("Shift dengan ID " + request.workShiftId() + " tidak ditemukan", HttpStatus.NOT_FOUND));
+                new ResourceNotFoundException("Shift dengan ID " + request.workShiftId() + " tidak ditemukan"));
         if (schedules.existsByPartTimeEmployee_IdAndWorkDateAndWorkShift_Id(employee.getId(), date, shift.getId()))
-            throw new BusinessRuleException("Shift tersebut sudah diajukan pada tanggal yang sama", HttpStatus.CONFLICT);
+            throw new DuplicateResourceException("Shift tersebut sudah diajukan pada tanggal yang sama");
         long shiftsOnDate = schedules.countByPartTimeEmployee_IdAndWorkDate(employee.getId(), date);
         if (shiftsOnDate >= 2)
-            throw new BusinessRuleException("Maksimal 2 shift dalam satu hari", HttpStatus.CONFLICT);
+            throw new BusinessRuleException("Maksimal 2 shift dalam satu hari");
         if (shiftsOnDate == 1) {
             List<com.exacc.trabea.shift.entity.Shift> existingShifts =
                     schedules.findShiftsByEmployeeAndDate(employee.getId(), date);
@@ -65,14 +66,13 @@ public class WorkScheduleService {
                             shift.getEndTime().equals(existingShifts.getFirst().getStartTime()));
             if (!adjacent) {
                 throw new BusinessRuleException(
-                        "Jika mengambil 2 shift dalam satu hari, shift harus berurutan.",
-                        HttpStatus.BAD_REQUEST);
+                        "Jika mengambil 2 shift dalam satu hari, shift harus berurutan.");
             }
         }
 
         LocalDate weekStart = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         if (schedules.countByEmployeeAndDateRange(employee.getId(), weekStart, weekStart.plusDays(5)) >= 5)
-            throw new BusinessRuleException("Maksimal 5 shift atau 20 jam dalam satu minggu", HttpStatus.CONFLICT);
+            throw new BusinessRuleException("Maksimal 5 shift atau 20 jam dalam satu minggu");
 
         WorkSchedule schedule = new WorkSchedule();
         schedule.setPartTimeEmployee(employee);
@@ -88,15 +88,15 @@ public class WorkScheduleService {
                 .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate end = thisMonday.plusWeeks(2);
         if (date.isBefore(thisMonday) || !date.isBefore(end))
-            throw new BusinessRuleException("Tanggal pengajuan harus pada minggu berjalan atau minggu berikutnya", HttpStatus.BAD_REQUEST);
+            throw new BusinessRuleException("Tanggal pengajuan harus pada minggu berjalan atau minggu berikutnya");
     }
 
     @Transactional(readOnly = true)
     public Page<WorkScheduleResponse> getMyWorkSchedules(String workEmail, int page, int size) {
         if (page < 0 || size < 1 || size > 100)
-            throw new BusinessRuleException("Page harus minimal 0 dan size antara 1 sampai 100", HttpStatus.BAD_REQUEST);
+            throw new BusinessRuleException("Page harus minimal 0 dan size antara 1 sampai 100");
         var employee = employees.findByUser_WorkEmail(workEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("Part-Time Employee tidak ditemukan", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException("Part-Time Employee tidak ditemukan"));
         return schedules.findMine(employee.getId(), PageRequest.of(page, size,
                         Sort.by(Sort.Order.asc("workDate"), Sort.Order.asc("workShift.id"))))
                 .map(mapper::toResponse);
@@ -106,7 +106,7 @@ public class WorkScheduleService {
     public List<SchedulePageItem> getSchedulePage(String week) {
         String selectedWeek = week == null ? "current" : week.trim().toLowerCase(java.util.Locale.ROOT);
         if (!selectedWeek.equals("current") && !selectedWeek.equals("next")) {
-            throw new BusinessRuleException("Parameter week harus bernilai current atau next", HttpStatus.BAD_REQUEST);
+            throw new BusinessRuleException("Parameter week harus bernilai current atau next");
         }
         LocalDate today = LocalDate.now(workScheduleClock);
         LocalDate start = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
@@ -119,9 +119,9 @@ public class WorkScheduleService {
     @Transactional(readOnly = true)
     public ScheduleEmployeeDetailResponse getScheduleEmployeeDetail(Integer partTimerId) {
         var employee = employees.findById(partTimerId).orElseThrow(() ->
-                new ResourceNotFoundException("Part-Time Employee dengan ID " + partTimerId + " tidak ditemukan", HttpStatus.NOT_FOUND));
+                new ResourceNotFoundException("Part-Time Employee dengan ID " + partTimerId + " tidak ditemukan"));
         if (!schedules.existsByPartTimeEmployee_IdAndIsApprovedTrue(partTimerId)) {
-            throw new ResourceNotFoundException("Part-Time Employee tidak memiliki jadwal approved", HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("Part-Time Employee tidak memiliki jadwal approved");
         }
         return mapper.toScheduleEmployeeDetailResponse(employee);
     }
@@ -134,12 +134,12 @@ public class WorkScheduleService {
     @Transactional(readOnly = true)
     public Page<ReviewItemResponse> searchPendingForReview(String name, Integer shiftId, LocalDate startDate,
                                                             LocalDate endDate, int page, int size) {
-        if (page < 0) throw new BusinessRuleException("page harus mulai dari 0", HttpStatus.BAD_REQUEST);
-        if (size < 1 || size > 100) throw new BusinessRuleException("size harus antara 1 dan 100", HttpStatus.BAD_REQUEST);
+        if (page < 0) throw new BusinessRuleException("page harus mulai dari 0");
+        if (size < 1 || size > 100) throw new BusinessRuleException("size harus antara 1 dan 100");
         LocalDate start = startDate == null ? EARLIEST_SCHEDULE_DATE : startDate;
         LocalDate end = endDate == null ? LATEST_SCHEDULE_DATE : endDate;
         if (start.isAfter(end)) {
-            throw new BusinessRuleException("startDate tidak boleh setelah endDate", HttpStatus.BAD_REQUEST);
+            throw new BusinessRuleException("startDate tidak boleh setelah endDate");
         }
         String normalizedName = name == null || name.isBlank() ? "" : name.trim();
         return schedules.searchPendingForReview(normalizedName, shiftId, start, end,
@@ -159,9 +159,9 @@ public class WorkScheduleService {
 
     private WorkScheduleApprovalResponse processApproval(Integer id, boolean approved) {
         WorkSchedule schedule = schedules.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Pengajuan jadwal dengan ID " + id + " tidak ditemukan", HttpStatus.NOT_FOUND));
+                new ResourceNotFoundException("Pengajuan jadwal dengan ID " + id + " tidak ditemukan"));
         if (schedule.getIsApproved() != null) {
-            throw new BusinessRuleException("Pengajuan jadwal sudah diproses", HttpStatus.CONFLICT);
+            throw new BusinessRuleException("Pengajuan jadwal sudah diproses");
         }
         schedule.setIsApproved(approved);
         return mapper.toApprovalResponse(schedules.save(schedule));

@@ -4,6 +4,7 @@ import com.exacc.trabea.common.ApiResponse;
 import com.exacc.trabea.parttime.dto.PartTimeEmployeeRequest;
 import com.exacc.trabea.parttime.dto.PartTimeEmployeeResponse;
 import com.exacc.trabea.parttime.service.PartTimeEmployeeService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/part-time-employees")
+@Tag(name = "Part-Time")
 @SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class PartTimeEmployeeController {

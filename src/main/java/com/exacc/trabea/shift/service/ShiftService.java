@@ -5,7 +5,6 @@ import com.exacc.trabea.shift.dto.ShiftResponse;
 import com.exacc.trabea.shift.mapper.ShiftMapper;
 import com.exacc.trabea.shift.repository.ShiftRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +25,6 @@ public class ShiftService {
 //    public ShiftResponse getShiftById(Integer id) {
 //        return shifts.findById(id)
 //                .map(mapper::toResponse)
-//                .orElseThrow(() -> new ResourceNotFoundException("Shift dengan ID " + id + " tidak ditemukan", HttpStatus.NOT_FOUND));
+//                .orElseThrow(() -> new ResourceNotFoundException("Shift dengan ID " + id + " tidak ditemukan"));
 //    }
 }

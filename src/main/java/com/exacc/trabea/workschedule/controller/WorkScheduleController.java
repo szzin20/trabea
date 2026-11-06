@@ -9,6 +9,7 @@ import com.exacc.trabea.workschedule.dto.ReviewItemResponse;
 import com.exacc.trabea.workschedule.dto.ScheduleEmployeeDetailResponse;
 import com.exacc.trabea.workschedule.service.WorkScheduleService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 @RequestMapping("/api/v1/work-schedules")
 @SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
+@Tag(name = "Work Schedule")
 public class WorkScheduleController {
     private final WorkScheduleService service;
 

@@ -1,6 +1,7 @@
 package com.exacc.trabea.parttime.service;
 
 import com.exacc.trabea.common.BusinessRuleException;
+import com.exacc.trabea.common.DuplicateResourceException;
 import com.exacc.trabea.common.ResourceNotFoundException;
 import com.exacc.trabea.parttime.dto.PartTimeEmployeeRequest;
 import com.exacc.trabea.parttime.dto.PartTimeEmployeeResponse;
@@ -16,7 +17,6 @@ import com.exacc.trabea.user.repository.UserRepository;
 import com.exacc.trabea.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,9 +40,9 @@ public class PartTimeEmployeeService {
         ensurePersonalContactsAvailable(request.personalEmail(), request.personalPhoneNumber(), null);
         String workEmail = slug(request.firstName()) + "." + slug(request.lastName()) + EMAIL_DOMAIN;
         if (users.existsByWorkEmail(workEmail))
-            throw new BusinessRuleException("Work email sudah digunakan: " + workEmail, HttpStatus.CONFLICT);
+            throw new DuplicateResourceException("Work email sudah digunakan: " + workEmail);
         var role = roles.findByName(RoleAuthority.canonical("PART_TIME"))
-                .orElseThrow(() -> new BusinessRuleException("Role PART_TIME belum terdaftar", HttpStatus.BAD_REQUEST));
+                .orElseThrow(() -> new BusinessRuleException("Role PART_TIME belum terdaftar"));
         User user = users.save(User.builder().workEmail(workEmail)
                 .password(passwordEncoder.encode(DEFAULT_PASSWORD)).build());
         userRoles.save(UserRole.builder().id(new UserRoleId(workEmail, role.getId()))
@@ -56,9 +56,9 @@ public class PartTimeEmployeeService {
 
     @Transactional(readOnly = true)
     public Page<PartTimeEmployeeResponse> findAll(int page, int size, String name) {
-        if (page < 0) throw new BusinessRuleException("Page harus minimal 0", HttpStatus.BAD_REQUEST);
+        if (page < 0) throw new BusinessRuleException("Page harus minimal 0");
         if (size < 1 || size > 100)
-            throw new BusinessRuleException("Size harus antara 1 dan 100", HttpStatus.BAD_REQUEST);
+            throw new BusinessRuleException("Size harus antara 1 dan 100");
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
         String keyword = (name == null) ? "" : name.trim();
         return employees.search(keyword, pageable)
@@ -88,13 +88,13 @@ public class PartTimeEmployeeService {
 
     private PartTimeEmployee getEmployee(Integer id) {
         return employees.findById(id).orElseThrow(() -> new ResourceNotFoundException(
-                "PartTimer dengan id " + id + " tidak ditemukan", HttpStatus.NOT_FOUND));
+                "PartTimer dengan id " + id + " tidak ditemukan"));
     }
     private void ensurePersonalContactsAvailable(String email, String phone, Integer id) {
         boolean emailUsed = id == null ? employees.existsByPersonalEmail(email.trim()) : employees.existsByPersonalEmailAndIdNot(email.trim(), id);
         boolean phoneUsed = id == null ? employees.existsByPersonalPhoneNumber(phone.trim()) : employees.existsByPersonalPhoneNumberAndIdNot(phone.trim(), id);
-        if (emailUsed) throw new BusinessRuleException("Personal email sudah digunakan", HttpStatus.CONFLICT);
-        if (phoneUsed) throw new BusinessRuleException("Nomor telepon pribadi sudah digunakan", HttpStatus.CONFLICT);
+        if (emailUsed) throw new DuplicateResourceException("Personal email sudah digunakan");
+        if (phoneUsed) throw new DuplicateResourceException("Nomor telepon pribadi sudah digunakan");
     }
     private String slug(String value) {
         return value.trim().toLowerCase(java.util.Locale.ROOT).replaceAll("\\s+", ".");
